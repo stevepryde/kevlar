@@ -61,7 +61,7 @@ impl TestConfig {
         let mut count = 0;
         loop {
             let mut new_dir = base_path.clone();
-            let now_str = Local::now().format("&Y&m&d_&H&M&S");
+            let now_str = Local::now().format("%Y%m%d_%H%M%S");
             let try_name = if count > 0 {
                 format!("{}_{}_{}", test_name_base, now_str, count)
             } else {

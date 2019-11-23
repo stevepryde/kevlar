@@ -1,9 +1,9 @@
-use crate::testcase::TestCase;
+use crate::testcase::{TestCase, AsyncTestCase};
 use crate::testconfig::{ConfigType, TestConfig};
 use crate::testresult::TestResult;
-use flexi_logger::{opt_format, Duplicate};
 use log::*;
 use std::path::PathBuf;
+use std::time::Instant;
 
 const VERSION: &'static str = env!("CARGO_PKG_VERSION");
 
@@ -28,18 +28,52 @@ impl TestHarness {
 
     /// Set up logging both to stderr and to a file.
     fn init_logging(test_name: &str, path: &PathBuf) {
-        flexi_logger::Logger::with_env_or_str(&format!("harness=info, {}=debug", test_name))
-            .log_to_file()
-            .directory(path)
-            .format(opt_format)
-            .duplicate_to_stderr(Duplicate::All)
-            .start()
-            .unwrap();
+        let mut log_file = path.clone();
+        log_file.push("test.log");
+
+        fern::Dispatch::new()
+            .level(log::LevelFilter::Off)
+            .level_for("kevlar", log::LevelFilter::Debug)
+            .level_for(format!("{}", test_name), log::LevelFilter::Debug)
+            .format(|out, message, record| {
+                out.finish(format_args!(
+                    "{}[{}][{}] {}",
+                    chrono::Local::now().format("%Y-%m-%d %H:%M:%S"),
+                    record.target(),
+                    record.level(),
+                    message
+                ))
+            })
+            .chain(std::io::stdout())
+            .chain(
+                fern::log_file(log_file)
+                    .expect(&format!("Error writing to log file: {}", path.display())),
+            )
+            .apply()
+            .expect("Error setting up logging");
     }
 
     /// Run the test harness. This will call the main test run() method.
     pub fn run(self, mut my_test: impl TestCase) {
-        let test_result = my_test.run(self.config, self.test_result);
+        let timer = Instant::now();
+        let mut test_result = self.test_result;
+        my_test.run(self.config, &mut test_result);
+        info!(
+            "Test completed in {:.3} seconds",
+            timer.elapsed().as_secs_f64()
+        );
+        info!("Test Result: {:?}", test_result);
+    }
+
+    pub async fn run_async(self, mut my_test: impl AsyncTestCase) {
+        let timer = Instant::now();
+        let mut test_result = self.test_result;
+        let test_status = my_test.run_async(self.config, &mut test_result).await;
+        test_result.set_status(test_status);
+        info!(
+            "Test completed in {:.3} seconds",
+            timer.elapsed().as_secs_f64()
+        );
         info!("Test Result: {:?}", test_result);
     }
 }
