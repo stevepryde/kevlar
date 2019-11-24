@@ -1,8 +1,13 @@
 [package]
 name = "kevlar"
 version = "0.1.0"
-authors = ["Steve Pryde <spryde81@gmail.com>"]
+authors = ["Steve Pryde <steve@stevepryde.com>"]
 edition = "2018"
+license = "MIT"
+homepage = "https://github.com/stevepryde/kevlar"
+repository = "https://github.com/stevepryde/kevlar"
+keywords = ["test", "harness", "integration", "regression"]
+categories = ["development-tools::testing"]
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
