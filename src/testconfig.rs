@@ -8,7 +8,6 @@ use std::path::PathBuf;
 
 pub enum ConfigType {
     File(PathBuf),
-    //    Env
 }
 
 #[derive(Serialize, Deserialize)]
