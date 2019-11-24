@@ -1,5 +1,6 @@
 [package]
 name = "kevlar"
+description = "A simple test harness for writing integration / regression tests in Rust"
 version = "0.1.0"
 authors = ["Steve Pryde <steve@stevepryde.com>"]
 edition = "2018"

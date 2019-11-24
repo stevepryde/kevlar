@@ -6,7 +6,7 @@ Its main goals are to provide all of the basic test harness functionality to boo
 test case, so that you can just focus on writing the tests.
 
 This includes:
-- Logging
+- Logging (already set up with a unique workspace directory created for your test)
 - Configuration parameters
 - Setting up a test workspace directory
 - Managing artifacts (provide methods to attach artifacts to the test result)
