@@ -7,6 +7,9 @@ use std::time::Instant;
 
 const VERSION: &'static str = env!("CARGO_PKG_VERSION");
 
+/// The TestHarness struct provides all of the basic test framework
+/// features and functionality to your test. It takes care of all of the
+/// fundamentals so you don't have to.
 pub struct TestHarness {
     config: TestConfig,
     test_result: TestResult,
@@ -14,6 +17,18 @@ pub struct TestHarness {
 
 impl TestHarness {
     /// Initialize the test harness.
+    ///
+    /// This sets up basic features such as logging, and prepares the test
+    /// workspace by providing a new unique directory below the path specified
+    /// in the config.json file.
+    ///
+    /// Usage:
+    /// ```
+    /// let harness = TestHarness::new(
+    ///     "kevlar_example",
+    ///     ConfigType::File(PathBuf::from("./config.json")),
+    /// );
+    /// ```
     pub fn new(test_name: &str, config: ConfigType) -> Self {
         let config = TestConfig::load(test_name, config);
         TestHarness::init_logging(test_name, &config.path);
@@ -53,11 +68,23 @@ impl TestHarness {
             .expect("Error setting up logging");
     }
 
-    /// Run the test harness. This will call the main test run() method.
-    pub fn run(self, mut my_test: impl TestCase) {
+    /// Run the test harness synchronously. This will call the main test run() method.
+    ///
+    /// Usage:
+    /// ```
+    /// struct MyTest;
+    ///
+    /// impl TestCase for MyTest {
+    ///     ...
+    /// }
+    /// ...
+    ///
+    /// harness.run::<MyTest>();
+    /// ```
+    pub fn run<F>(self) where F: Default + TestCase {
         let timer = Instant::now();
         let mut test_result = self.test_result;
-        my_test.run(self.config, &mut test_result);
+        F::default().run(self.config, &mut test_result);
         info!(
             "Test completed in {:.3} seconds",
             timer.elapsed().as_secs_f64()
@@ -65,10 +92,24 @@ impl TestHarness {
         info!("Test Result: {:?}", test_result);
     }
 
-    pub async fn run_async(self, mut my_test: impl AsyncTestCase) {
+    /// Run the test harness asynchronously. This will call the main test run_async() method.
+    ///
+    /// Usage:
+    /// ```
+    /// struct MyTest;
+    ///
+    /// impl AsyncTestCase for MyTest {
+    ///     ...
+    /// }
+    /// ...
+    ///
+    /// harness.run_async::<MyTest>();
+    /// ```
+    pub async fn run_async<F>(self) where F: Default + AsyncTestCase {
         let timer = Instant::now();
         let mut test_result = self.test_result;
-        let test_status = my_test.run_async(self.config, &mut test_result).await;
+        let test_status = F::default().run_async(
+            self.config, &mut test_result).await;
         test_result.set_status(test_status);
         info!(
             "Test completed in {:.3} seconds",
@@ -77,3 +118,4 @@ impl TestHarness {
         info!("Test Result: {:?}", test_result);
     }
 }
+

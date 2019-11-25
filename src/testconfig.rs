@@ -17,6 +17,10 @@ pub struct TestConfig {
 
 impl TestConfig {
     /// Load the config using one of the available methods.
+    ///
+    /// The test_name will be used to generate the test workspace directory.
+    /// The config_type can be used to specify config via a JSON file or
+    /// (later) via environment variables. Currently only JSON is supported.
     pub fn load(test_name: &str, config_type: ConfigType) -> Self {
         let mut config = match config_type {
             ConfigType::File(f) => TestConfig::load_from_file(&f),
