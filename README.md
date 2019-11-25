@@ -111,7 +111,7 @@ Rust allows crates to build multiple binaries, which may be an option
 to explore for housing multiple tests in the same crate. Otherwise
 each test would need to have its own crate, and be independently built.
 This is not so terrible, but does add some complexity to your build 
-system. Any reduction in complexity it good so I will look at ways 
+system. Any reduction in complexity is good so I will look at ways 
 to simplify this.
 
 This crate should be considered experimental for the foreseeable future
