@@ -1,6 +1,6 @@
 use crate::testcase::{TestCase, AsyncTestCase};
 use crate::testconfig::{ConfigType, TestConfig};
-use crate::testresult::TestResult;
+use crate::testresult::TestRecord;
 use log::*;
 use std::path::PathBuf;
 use std::time::Instant;
@@ -12,7 +12,7 @@ const VERSION: &'static str = env!("CARGO_PKG_VERSION");
 /// fundamentals so you don't have to.
 pub struct TestHarness {
     config: TestConfig,
-    test_result: TestResult,
+    test_record: TestRecord,
 }
 
 impl TestHarness {
@@ -37,7 +37,7 @@ impl TestHarness {
         // TODO: collect system info and log it here.
         TestHarness {
             config,
-            test_result: TestResult::new(test_name),
+            test_record: TestRecord::new(test_name),
         }
     }
 
@@ -83,13 +83,14 @@ impl TestHarness {
     /// ```
     pub fn run<F>(self) where F: Default + TestCase {
         let timer = Instant::now();
-        let mut test_result = self.test_result;
-        F::default().run(self.config, &mut test_result);
+        let mut test_record = self.test_record;
+        let result = F::default().run(self.config, &mut test_record);
+        test_record.apply_result(result);
         info!(
             "Test completed in {:.3} seconds",
             timer.elapsed().as_secs_f64()
         );
-        info!("Test Result: {:?}", test_result);
+        info!("Test Result: {:?}", test_record.get_status());
     }
 
     /// Run the test harness asynchronously. This will call the main test run_async() method.
@@ -107,15 +108,15 @@ impl TestHarness {
     /// ```
     pub async fn run_async<F>(self) where F: Default + AsyncTestCase {
         let timer = Instant::now();
-        let mut test_result = self.test_result;
-        let test_status = F::default().run_async(
-            self.config, &mut test_result).await;
-        test_result.set_status(test_status);
+        let mut test_record = self.test_record;
+        let result = F::default().run_async(
+            self.config, &mut test_record).await;
+        test_record.apply_result(result);
         info!(
             "Test completed in {:.3} seconds",
             timer.elapsed().as_secs_f64()
         );
-        info!("Test Result: {:?}", test_result);
+        info!("Test Result: {}", test_record.get_status());
     }
 }
 

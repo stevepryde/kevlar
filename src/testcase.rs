@@ -1,5 +1,5 @@
 use crate::testconfig::TestConfig;
-use crate::testresult::{TestResult, TestStatus};
+use crate::testresult::{TestRecord, TestResult};
 use async_trait::async_trait;
 
 /// Implement the TestCase trait in order to run your test synchronously.
@@ -10,15 +10,15 @@ use async_trait::async_trait;
 /// struct MyTest;
 ///
 /// impl TestCase for MyTest {
-///     fn run(&mut self, test_config: TestConfig, test_result: &mut TestResult) -> TestStatus {
+///     fn run(&mut self, test_config: TestConfig, test_record: &mut TestRecord) -> TestResult {
 ///         info!("Do something interesting");
-///         TestStatus::Passed
+///         Ok(())
 ///     }
 /// }
 /// ```
 pub trait TestCase {
     /// Run the test case and return the TestStatus code.
-    fn run(&mut self, test_config: TestConfig, test_result: &mut TestResult) -> TestStatus;
+    fn run(&mut self, test_config: TestConfig, test_record: &mut TestRecord) -> TestResult;
 }
 
 /// Implement the AsyncTestCase trait in order to run your test asynchronously.
@@ -30,14 +30,14 @@ pub trait TestCase {
 ///
 /// #[async_trait]
 /// impl AsyncTestCase for MyTest {
-///     async fn run_async(&mut self, test_config: TestConfig, test_result: &mut TestResult) -> TestStatus {
+///     async fn run_async(&mut self, test_config: TestConfig, test_record: &mut TestRecord) -> TestResult {
 ///         info!("Do something interesting");
-///         TestStatus::Passed
+///         Ok(())
 ///     }
 /// }
 /// ```
 #[async_trait]
 pub trait AsyncTestCase {
     /// Run the test case and return the TestStatus code.
-    async fn run_async(&mut self, test_config: TestConfig, test_result: &mut TestResult) -> TestStatus;
+    async fn run_async(&mut self, test_config: TestConfig, test_record: &mut TestRecord) -> TestResult;
 }

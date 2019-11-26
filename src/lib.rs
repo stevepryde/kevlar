@@ -9,9 +9,9 @@
 //! [built-in testing features](https://doc.rust-lang.org/book/ch11-00-testing.html) instead.
 //!
 //! ```rust
-//! use kevlar::{ConfigType, TestConfig, TestHarness, TestStatus, TestResult, AsyncTestCase};
+//! use kevlar::*;
 //! use std::path::PathBuf;
-//! use async_trait::async_trait; // Required until async is supported in traits
+//! use async_trait::async_trait;
 //! use log::*;
 //!
 //! #[tokio::main]
@@ -28,23 +28,25 @@
 //!
 //! #[async_trait]
 //! impl AsyncTestCase for MyTest {
-//!     async fn run_async(&mut self, test_config: TestConfig, test_result: &mut TestResult) -> TestStatus {
-//!         info!("Do something interesting!");
-//!         TestStatus::Passed
+//!     async fn run_async(&mut self, _test_config: TestConfig, _test_result: &mut TestRecord) -> TestResult {
+//!         info!("Do something interesting");
+//!         Err(TestEvent::new(TestStatus::Failed).with_description("Something went wrong"))
 //!     }
-//!}
-//!```
+//! }
+//! ```
 
-pub mod testcase;
-pub mod testconfig;
-pub mod testharness;
-pub mod testresult;
+mod testcase;
+mod testconfig;
+mod testharness;
+mod testresult;
 
 // Convenience re-exports.
 pub use testcase::{AsyncTestCase, TestCase};
 pub use testconfig::{ConfigType, TestConfig};
 pub use testharness::TestHarness;
-pub use testresult::{TestResult, TestStatus};
+pub use testresult::{
+    TestArtifact, TestArtifactType, TestEvent, TestRecord, TestResult, TestStatus,
+};
 
 #[cfg(test)]
 mod tests {

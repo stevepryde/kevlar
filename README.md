@@ -37,16 +37,17 @@ System-Under-Test.
 
 ## Example usage
 
-**NOTE** It is still WIP. I plan to remove a lot of boilerplate and shrink 
-this down as much as possible. Both synchronous and asyncronous tests are supported.
+**NOTE** It is still WIP. 
 
 I will be experimenting with the syntax for this quite a lot in the coming weeks/months, until
 I come up with something that feels ergonomic to write at scale.
 
+Both synchronous and asyncronous tests are supported.
+
 ```rust
-use kevlar::{ConfigType, TestConfig, TestHarness, TestStatus, TestResult, AsyncTestCase};
+use kevlar::*;
 use std::path::PathBuf;
-use async_trait::async_trait; // Required until async is supported in traits
+use async_trait::async_trait;
 use log::*;
 
 #[tokio::main]
@@ -63,9 +64,9 @@ struct MyTest;
 
 #[async_trait]
 impl AsyncTestCase for MyTest {
-    async fn run_async(&mut self, test_config: TestConfig, test_result: &mut TestResult) -> TestStatus {
-        info!("Do something interesting!");
-        TestStatus::Passed
+    async fn run_async(&mut self, _test_config: TestConfig, _test_result: &mut TestRecord) -> TestResult {
+        info!("Do something interesting");
+        Err(TestEvent::new(TestStatus::Failed).with_description("Something went wrong"))
     }
 }
 ```
@@ -87,9 +88,9 @@ The closest equivalent would be dynamically linked libraries (DLLs).
 
 However, loading dynamic modules means the modules themselves need to 
 contain a lot of boilerplate in order to expose the C-style FFI.
-You end up adding complexity essentially just to avoid including the 
-test harness setup code in each test. But this only matters if your 
-test harness is very large.
+You end up adding complexity (not to mention several 'unsafe' blocks)
+essentially just to avoid including the test harness setup code in each
+test. But this only matters if your test harness is very large.
 
 The solution proposed by this crate is to provide the Test Harness
 as a light-weight add-on that you can use to bootstrap your tests in
@@ -117,4 +118,4 @@ to simplify this.
 This crate should be considered experimental for the foreseeable future
 and later versions will very likely contain breaking changes.
 
-Stability is planned for v1.0, if/when I get there.
+Stability is planned for v1.0 onwards. Until then, expect breakages.
